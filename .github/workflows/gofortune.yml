@@ -13,9 +13,10 @@ on:
 jobs:
 
   build_and_deploy:
-    runs-on: ubuntu-latest
+  if: ${{ !startsWith(github.event.head_commit.message, '#NORUN') }}
+  runs-on: ubuntu-latest
     steps:
-      - name: Echo current branch
+     - name: Echo current branch
         run: echo “$(date):current branch is ${{ github.ref_name }}”
         
       - name: Checkout current branch 
@@ -23,7 +24,21 @@ jobs:
         with:
          ref: ${{ github.ref_name }}
          token: ${{ secrets.YOUR_GITHUB_TOKEN}}
+     - name: Use Node 18
+        uses: actions/setup-node@v3
+        with:
+        node-version: '18'
         
+      - name: Login to RailWay
+        run: railway login 
+
+      - name: Link Railway Project
+        run: railway link 
+
+      - name: Deploy to railway
+        run: railway up 
+        env:
+         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       - name: Release
         id: create_release
         uses: actions/create-release@latest
@@ -33,9 +48,9 @@ jobs:
          tag_name: ${{ github.ref_name }}
          release_name: Release ${{ github.ref_name }}
          body: |
-            Golang Release
-         draft: false
-         prerelease: false
+             Golang Release
+              draft: false
+              prerelease: false
          
       - name: Send custom JSON data to Slack workflow
         id: slack
@@ -102,8 +117,7 @@ jobs:
          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL1 }}
          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
          
-     - name: Not allowed message
-       if: ${{ !startsWith(github.event.head_commit.message, '#NORUN') }}
+     
         
          
          
