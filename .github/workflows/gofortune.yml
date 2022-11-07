@@ -37,7 +37,7 @@ jobs:
          draft: false
          prerelease: false
          
-      - name: Send to Slack
+      - name: Send custom JSON data to Slack workflow
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
@@ -101,5 +101,9 @@ jobs:
         env:
          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL1 }}
          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+         
+     - name: Not allowed message
+       if: ${{ !startsWith(github.event.head_commit.message, '#NORUN') }}
+        
          
          
